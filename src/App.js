@@ -1,26 +1,41 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {Component} from 'react';
+import Alarm from './components/Alarm';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const alarms = [
+	{
+		name: 'Weekday Morning Alarm',
+		voiceId: 'Matthew',
+		message: 'Good morning!',
+		schedule: ['Monday', 'Tuesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+	},
+	{
+		name: 'Morning Alarm Weekends',
+		voiceId: 'Matthew',
+		message: 'Good morning, Cameron!',
+		schedule: ['Monday', 'Tuesday', 'Thursday'],
+	},
+	{
+		name: 'Morning Alarm Whatever',
+		voiceId: 'James',
+		message: 'Good afternoon, Cameron!',
+		schedule: ['Monday', 'Friday', 'Saturday', 'Sunday'],
+	},
+];
+
+class App extends Component {
+	render() {
+		return (
+			<div className="container">
+				{alarms.map(alarm => {
+					return (
+						<div className="row justify-content-around">
+							<Alarm alarm={alarm} />
+						</div>
+					);
+				})}
+			</div>
+		);
+	}
 }
 
 export default App;
