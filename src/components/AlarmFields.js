@@ -3,55 +3,39 @@ import React, {Component} from 'react';
 class AlarmTextField extends Component {
 	constructor(props) {
 		super(props);
-
-		this.updateParent = this.updateParent.bind(this);
-
 		this.state = {
-			static: this.props.static,
 			val: this.props.val,
 		};
-	}
-
-	updateParent(message) {
-		this.props.update(message);
 	}
 
 	handleChange = e => {
 		this.setState({
 			val: e.target.value,
 		});
-		this.updateParent(e.target.value);
+		this.props.update(e.target.value);
 	};
 
 	render() {
-		const fieldClass = this.props.disabled
-			? 'col-9 text-secondary'
-			: this.props.static
-			? 'col-9 text-purple'
-			: 'col-9';
+		const {title, val, disabled} = this.props;
+		const fieldClass = 'col-9 text-' + (disabled ? 'secondary' : this.props.static ? 'purple' : 'white');
+		const titleClass = 'col-3 text-' + (disabled ? 'secondary' : 'white');
 
-		const titleClass = this.props.disabled ? 'col-3 text-secondary' : 'col-3';
-
-		const {title, val} = this.props;
-		return this.props.static ? (
-			<li className="list-group-item">
-				<div className="row">
-					<div className={titleClass}>{title}</div>
-					<div className={fieldClass}>{val}</div>
-				</div>
-			</li>
+		const internalRender = this.props.static ? (
+			val
 		) : (
+			<input
+				type="text"
+				className="form-control bg-secondary text-white"
+				value={this.state.val}
+				onChange={this.handleChange}
+			/>
+		);
+
+		return (
 			<li className="list-group-item">
 				<div className="row">
 					<div className={titleClass}>{title}</div>
-					<div className={fieldClass}>
-						<input
-							type="text"
-							className="form-control bg-secondary text-white"
-							value={this.state.val}
-							onChange={this.handleChange}
-						/>
-					</div>
+					<div className={fieldClass}>{internalRender}</div>
 				</div>
 			</li>
 		);
@@ -61,11 +45,7 @@ class AlarmTextField extends Component {
 class AlarmDropdownField extends Component {
 	constructor(props) {
 		super(props);
-
-		this.updateParent = this.updateParent.bind(this);
-
 		this.state = {
-			static: this.props.static,
 			val: this.props.val,
 		};
 	}
@@ -74,49 +54,37 @@ class AlarmDropdownField extends Component {
 		this.setState({
 			val: e.target.value,
 		});
-		this.updateParent(e.target.value);
+		this.props.update(e.target.value);
 	};
 
-	updateParent(val) {
-		this.props.update(val);
-	}
-
 	render() {
-		const fieldClass = this.props.disabled
-			? 'col-9 text-secondary'
-			: this.props.static
-			? 'col-9 text-purple'
-			: 'col-9';
-
-		const titleClass = this.props.disabled ? 'col-3 text-secondary' : 'col-3';
-
-		return this.props.static ? (
-			<li className="list-group-item">
-				<div className="row">
-					<div className={titleClass}>{this.props.title}</div>
-					<div className={fieldClass}>{this.state.val}</div>
-				</div>
-			</li>
+		const {title, val, disabled} = this.props;
+		const fieldClass = 'col-9 text-' + (disabled ? 'secondary' : this.props.static ? 'purple' : 'white');
+		const titleClass = 'col-3 text-' + (disabled ? 'secondary' : 'white');
+		const internalRender = this.props.static ? (
+			val
 		) : (
+			<select
+				multiple={false}
+				className="form-control bg-secondary text-white"
+				value={this.state.val}
+				onChange={this.handleChange}
+			>
+				{this.props.fields.map(field => {
+					return (
+						<option value={field} key={field}>
+							{field}
+						</option>
+					);
+				})}
+			</select>
+		);
+
+		return (
 			<li className="list-group-item">
 				<div className="row">
-					<div className={titleClass}>{this.props.title}</div>
-					<div className={fieldClass}>
-						<select
-							multiple={false}
-							className="form-control bg-secondary text-white"
-							value={this.state.val}
-							onChange={this.handleChange}
-						>
-							{this.props.fields.map(field => {
-								return (
-									<option value={field} key={field}>
-										{field}
-									</option>
-								);
-							})}
-						</select>
-					</div>
+					<div className={titleClass}>{title}</div>
+					<div className={fieldClass}>{internalRender}</div>
 				</div>
 			</li>
 		);
@@ -127,19 +95,3 @@ export default {
 	AlarmTextField: AlarmTextField,
 	AlarmDropdownField: AlarmDropdownField,
 };
-
-/*
- <div className="col-auto">
-<div className="input-group mb-2">
-    <div class="input-group-append">
-        <i class="far fa-check-square"></i>
-    </div>
-</div>
-<input
-    type={formType}
-    className="form-control bg-secondary text-white"
-    id=""
-    value={val}
-    onChange={this.handleChange}
-/>
-</div> */

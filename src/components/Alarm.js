@@ -5,16 +5,12 @@ class Alarm extends Component {
 	constructor(props) {
 		super(props);
 
-		this.updateMessage = this.updateMessage.bind(this);
-		this.updateVoiceId = this.updateVoiceId.bind(this);
-		this.setDisabled = this.setDisabled.bind(this);
-
 		this.state = {
 			staticFields: true,
 			message: this.props.alarm.message,
 			voiceId: this.props.alarm.voiceId,
 			name: this.props.alarm.name,
-			disabled: this.props.disabled,
+			disabled: this.props.alarm.disabled,
 		};
 
 		this.voiceIds = [
@@ -36,27 +32,30 @@ class Alarm extends Component {
 		];
 	}
 
-	setEditable = () => {
-		this.setState({staticFields: false});
-	};
-
-	setStatic = e => {
-		console.log(this.state);
+	updateAlarm = () => {
 		this.setState({staticFields: true});
+		if (
+			this.props.alarm.message !== this.state.message ||
+			this.props.alarm.voiceId !== this.state.voiceId ||
+			this.props.alarm.disabled !== this.state.disabled
+		) {
+			this.props.alarm.message = this.state.message;
+			this.props.alarm.voiceId = this.state.voiceId;
+			this.props.alarm.disabled = this.state.disabled;
+			this.props.updateAlarm(this.props.alarm);
+		}
 	};
 
-	setDisabled() {
+	setDisabled = () => {
 		this.setState({staticFields: true, disabled: true});
+		this.props.alarm.disabled = true;
+		this.props.updateAlarm(this.props.alarm);
 	}
 
-	updateMessage(message) {
-		console.log(message);
-		this.setState({message: message});
-	}
-
-	updateVoiceId(voiceId) {
-		console.log(voiceId);
-		this.setState({voiceId: voiceId});
+	setEnabled = () => {
+		this.setState({disabled: false});
+		this.props.alarm.disabled = false;
+		this.props.updateAlarm(this.props.alarm);
 	}
 
 	renderEditButton() {
@@ -64,14 +63,16 @@ class Alarm extends Component {
 			<button
 				type="button"
 				className="btn btn-secondary hover-purple btn-lg"
-				onClick={() => {
-					this.setState({disabled: false});
-				}}
+				onClick={this.setEnabled}
 			>
 				Enable
 			</button>
 		) : !this.state.staticFields ? (
-			<button type="button" className="btn btn-success" onClick={this.setStatic}>
+			<button
+				type="button"
+				className="btn btn-success"
+				onClick={this.updateAlarm}
+			>
 				<i className="fas fa-check"></i>
 			</button>
 		) : (
@@ -117,29 +118,19 @@ class Alarm extends Component {
 	}
 
 	render() {
+		const isDisabled = this.state.disabled;
+		const name = this.state.name;
+		const textClass = 'h3' + (isDisabled ? ' text-secondary' : '');
+
 		const headerMain = (
 			<div className="row align-items-center mb-2 justify-content-around">
 				<div className="col-8">
-					<p className={this.state.disabled ? 'h3 text-secondary' : 'h3'}>{this.state.name}</p>
+					<p className={textClass}>{name}</p>
 				</div>
 				<div className="col-auto">{this.renderEditButton()}</div>
 			</div>
 		);
 
-		const headerSchedule = (
-			<div className="row align-items-center mb-2 justify-content-around">
-				<div className="col-8">
-					<p className="h3">Schedule</p>
-				</div>
-				<div className="col-auto">
-					<div className="dropdown">
-						<button type="button" className="btn btn-secondary">
-							<i className="fas fa-cog"></i>
-						</button>
-					</div>
-				</div>
-			</div>
-		);
 		return (
 			<>
 				<div className="col-md-9 col-lg-7 rounded-lg shadow-lg col-mgn bg-dark">
@@ -149,22 +140,25 @@ class Alarm extends Component {
 							static={this.state.staticFields}
 							val={this.state.message}
 							title="Message"
-							update={this.updateMessage}
-							disabled={this.state.disabled}
+							update={message => {
+								this.setState({message: message});
+							}}
+							disabled={isDisabled}
 						/>
 						<AlarmFields.AlarmDropdownField
 							static={this.state.staticFields}
 							val={this.state.voiceId}
 							title="Spoken By"
 							fields={this.voiceIds}
-							update={this.updateVoiceId}
-							disabled={this.state.disabled}
+							update={voiceId => {
+								this.setState({voiceId: voiceId});
+							}}
+							disabled={isDisabled}
 						/>
 					</ul>
-					{/* {this.renderSubmitButton()} */}
 				</div>
 				<div className="col-md-9 col-lg-4 rounded-lg shadow-lg col-mgn bg-dark">
-					{headerSchedule}
+					<p className="h3">Schedule</p>
 					<ul className="list-group list-group-flush list-group-active">
 						{this.props.alarm.schedule.map(dt => {
 							return (
