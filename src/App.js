@@ -1,24 +1,27 @@
 import React, {Component} from 'react';
 import Alarm from './components/Alarm';
 
-const alarms = [
+var alarms = [
 	{
 		name: 'Weekday Morning Alarm',
 		voiceId: 'Matthew',
 		message: 'Good morning!',
-		schedule: ['Monday', 'Tuesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+		schedule: [
+			'Monday@10:00 AM',
+			'Tuesday@11:00 AM',
+			'Thursday@12:00 AM',
+			'Friday@10:00 AM',
+			'Saturday@10:00 AM',
+			'Sunday@10:00 AM',
+		],
+		disabled: false,
 	},
 	{
-		name: 'Morning Alarm Weekends',
+		name: 'Weekend Morning Alarm',
 		voiceId: 'Matthew',
 		message: 'Good morning, Cameron!',
-		schedule: ['Monday', 'Tuesday', 'Thursday'],
-	},
-	{
-		name: 'Morning Alarm Whatever',
-		voiceId: 'James',
-		message: 'Good afternoon, Cameron!',
-		schedule: ['Monday', 'Friday', 'Saturday', 'Sunday'],
+		schedule: ['Saturday@10:00 AM', 'Sunday@10:00 AM'],
+		disabled: true,
 	},
 ];
 
@@ -28,8 +31,8 @@ class App extends Component {
 			<div className="container">
 				{alarms.map(alarm => {
 					return (
-						<div className="row justify-content-around">
-							<Alarm alarm={alarm} />
+						<div className="row justify-content-around" key={alarm.name}>
+							<Alarm alarm={alarm} disabled={alarm.disabled} />
 						</div>
 					);
 				})}

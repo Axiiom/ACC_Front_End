@@ -7,12 +7,14 @@ class Alarm extends Component {
 
 		this.updateMessage = this.updateMessage.bind(this);
 		this.updateVoiceId = this.updateVoiceId.bind(this);
+		this.setDisabled = this.setDisabled.bind(this);
 
 		this.state = {
 			staticFields: true,
 			message: this.props.alarm.message,
 			voiceId: this.props.alarm.voiceId,
 			name: this.props.alarm.name,
+			disabled: this.props.disabled,
 		};
 
 		this.voiceIds = [
@@ -39,74 +41,100 @@ class Alarm extends Component {
 	};
 
 	setStatic = e => {
+		console.log(this.state);
 		this.setState({staticFields: true});
 	};
 
-	renderSubmitButton() {
-		if (!this.state.staticFields) {
-			return (
-				<div className="container">
-					<button type="button" className="btn btn-success" onClick={this.setStatic}>
-						<i className="fas fa-check"></i>
-					</button>
-				</div>
-			);
-		}
+	setDisabled() {
+		this.setState({staticFields: true, disabled: true});
 	}
 
 	updateMessage(message) {
+		console.log(message);
 		this.setState({message: message});
 	}
 
 	updateVoiceId(voiceId) {
+		console.log(voiceId);
 		this.setState({voiceId: voiceId});
+	}
+
+	renderEditButton() {
+		return this.state.disabled ? (
+			<button
+				type="button"
+				className="btn btn-secondary hover-purple btn-lg"
+				onClick={() => {
+					this.setState({disabled: false});
+				}}
+			>
+				Enable
+			</button>
+		) : !this.state.staticFields ? (
+			<button type="button" className="btn btn-success" onClick={this.setStatic}>
+				<i className="fas fa-check"></i>
+			</button>
+		) : (
+			<div className="dropdown">
+				<button
+					className="btn btn-secondary dropdown-toggle"
+					type="button"
+					id="dropdownMenuButton"
+					data-toggle="dropdown"
+					aria-haspopup="true"
+					aria-expanded="false"
+				>
+					<i className="fas fa-cog"></i>
+				</button>
+				<div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+					<button
+						type="button"
+						className="dropdown-item"
+						onClick={() => {
+							this.setState({staticFields: false});
+						}}
+					>
+						<div className="row">
+							<div className="col-2">
+								<i className="fas fa-wrench text-edit"></i>
+							</div>
+							<div className="col-auto">Edit</div>
+						</div>
+					</button>
+					<button className="dropdown-item" onClick={this.setDisabled}>
+						<div className="row">
+							<div className="col-2 text-yellow">
+								<i className="fas fa-comment-slash"></i>
+							</div>
+							<div className="col-auto">Disable</div>
+						</div>
+					</button>
+					<div className="dropdown-divider"></div>
+					<button className="dropdown-item hover-danger">Delete</button>
+				</div>
+			</div>
+		);
 	}
 
 	render() {
 		const headerMain = (
 			<div className="row align-items-center mb-2 justify-content-around">
-				<div className="col-xl-9 col-lg-9 col-md-9 col-sm-9 col-xs-9">
-					<p className="h3">{this.state.name}</p>
+				<div className="col-8">
+					<p className={this.state.disabled ? 'h3 text-secondary' : 'h3'}>{this.state.name}</p>
 				</div>
-				<div className="col-xs-3">
-					<div className="dropdown">
-						<button
-							className="btn btn-secondary dropdown-toggle"
-							type="button"
-							id="dropdownMenuButton"
-							data-toggle="dropdown"
-							aria-haspopup="true"
-							aria-expanded="false"
-						>
-							<i className="fas fa-cog"></i>
-						</button>
-						<div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-							<button
-								type="button"
-								className="dropdown-item"
-								onClick={() => {
-									this.setState({staticFields: false});
-								}}
-							>
-								Edit
-							</button>
-							<button className="dropdown-item">Disable</button>
-							<button className="dropdown-item">Delete</button>
-						</div>
-					</div>
-				</div>
+				<div className="col-auto">{this.renderEditButton()}</div>
 			</div>
 		);
 
 		const headerSchedule = (
-			<div class="row align-items-center mb-2 justify-content-around">
-				<div class="col-xl-9 col-lg-9 col-md-9 col-sm-9 col-xs-9">
-					<p class="h3">Schedule</p>
+			<div className="row align-items-center mb-2 justify-content-around">
+				<div className="col-8">
+					<p className="h3">Schedule</p>
 				</div>
-				<div class="col-xs-3">
-					<div class="dropdown">
-						<button type="button" class="btn btn-secondary">
-							<i class="fas fa-cog"></i>
+				<div className="col-auto">
+					<div className="dropdown">
+						<button type="button" className="btn btn-secondary">
+							<i className="fas fa-cog"></i>
 						</button>
 					</div>
 				</div>
@@ -114,10 +142,7 @@ class Alarm extends Component {
 		);
 		return (
 			<>
-				<div
-					className="col-xl-7 col-lg-7 col-md-8 col-sm-12 col-xs-12 rounded-lg shadow-lg col-mgn bg-dark"
-					// style={{padding: '4vh'}}
-				>
+				<div className="col-md-9 col-lg-7 rounded-lg shadow-lg col-mgn bg-dark">
 					{headerMain}
 					<ul className="list-group list-group-flush">
 						<AlarmFields.AlarmTextField
@@ -125,6 +150,7 @@ class Alarm extends Component {
 							val={this.state.message}
 							title="Message"
 							update={this.updateMessage}
+							disabled={this.state.disabled}
 						/>
 						<AlarmFields.AlarmDropdownField
 							static={this.state.staticFields}
@@ -132,34 +158,24 @@ class Alarm extends Component {
 							title="Spoken By"
 							fields={this.voiceIds}
 							update={this.updateVoiceId}
+							disabled={this.state.disabled}
 						/>
 					</ul>
-					{this.renderSubmitButton()}
+					{/* {this.renderSubmitButton()} */}
 				</div>
-				<div
-					class="col-xl-4 col-lg-4 col-md-8 col-sm-12 col-xs-12 rounded-lg shadow-lg col-mgn bg-dark"
-					// style={{padding: '4vh'}}
-				>
+				<div className="col-md-9 col-lg-4 rounded-lg shadow-lg col-mgn bg-dark">
 					{headerSchedule}
-					<ul class="list-group list-group-flush list-group-active">
-						<li class="list-group-item">
-							<div class="row">
-								<div class="col-5">Monday</div>
-								<div class="col-7 text-purple">10:00 AM</div>
-							</div>
-						</li>
-						<li class="list-group-item">
-							<div class="row">
-								<div class="col-5">Monday</div>
-								<div class="col-7 text-purple">10:00 AM</div>
-							</div>
-						</li>
-						<li class="list-group-item">
-							<div class="row">
-								<div class="col-5">Monday</div>
-								<div class="col-7 text-purple">10:00 AM</div>
-							</div>
-						</li>
+					<ul className="list-group list-group-flush list-group-active">
+						{this.props.alarm.schedule.map(dt => {
+							return (
+								<li className="list-group-item" key={dt}>
+									<div className="row">
+										<div className="col-5">{dt.split('@')[0]}</div>
+										<div className="col-7 text-purple">{dt.split('@')[1]}</div>
+									</div>
+								</li>
+							);
+						})}
 					</ul>
 				</div>
 			</>

@@ -4,43 +4,50 @@ class AlarmTextField extends Component {
 	constructor(props) {
 		super(props);
 
-        this.updateParent = this.updateParent.bind(this)
+		this.updateParent = this.updateParent.bind(this);
 
 		this.state = {
 			static: this.props.static,
 			val: this.props.val,
 		};
-    }
-    
-    updateParent(message) {
-        this.props.update(message)
-    }
+	}
+
+	updateParent(message) {
+		this.props.update(message);
+	}
 
 	handleChange = e => {
 		this.setState({
 			val: e.target.value,
 		});
-		this.updateParent(e.target.value)
+		this.updateParent(e.target.value);
 	};
 
 	render() {
-		const fieldClass = this.props.static ? 'col-9 text-purple' : 'col-9';
+		const fieldClass = this.props.disabled
+			? 'col-9 text-secondary'
+			: this.props.static
+			? 'col-9 text-purple'
+			: 'col-9';
+
+		const titleClass = this.props.disabled ? 'col-3 text-secondary' : 'col-3';
+
 		const {title, val} = this.props;
 		return this.props.static ? (
 			<li className="list-group-item">
 				<div className="row">
-					<div className="col-3">{title}</div>
-					<div className="col-9 text-purple">{val}</div>
+					<div className={titleClass}>{title}</div>
+					<div className={fieldClass}>{val}</div>
 				</div>
 			</li>
 		) : (
 			<li className="list-group-item">
 				<div className="row">
-					<div className="col-3">{title}</div>
+					<div className={titleClass}>{title}</div>
 					<div className={fieldClass}>
 						<input
 							type="text"
-							className="form-control"
+							className="form-control bg-secondary text-white"
 							value={this.state.val}
 							onChange={this.handleChange}
 						/>
@@ -55,7 +62,7 @@ class AlarmDropdownField extends Component {
 	constructor(props) {
 		super(props);
 
-        this.updateParent = this.updateParent.bind(this)
+		this.updateParent = this.updateParent.bind(this);
 
 		this.state = {
 			static: this.props.static,
@@ -65,37 +72,48 @@ class AlarmDropdownField extends Component {
 
 	handleChange = e => {
 		this.setState({
-			val: e.target.value
+			val: e.target.value,
 		});
-		this.updateParent(e.target.value)
-    };
-    
-    updateParent(val) {
-        this.props.update(val)
-    }
+		this.updateParent(e.target.value);
+	};
+
+	updateParent(val) {
+		this.props.update(val);
+	}
 
 	render() {
-		const fieldClass = this.props.static ? 'col-9 text-purple' : 'col-9';
+		const fieldClass = this.props.disabled
+			? 'col-9 text-secondary'
+			: this.props.static
+			? 'col-9 text-purple'
+			: 'col-9';
+
+		const titleClass = this.props.disabled ? 'col-3 text-secondary' : 'col-3';
+
 		return this.props.static ? (
 			<li className="list-group-item">
 				<div className="row">
-					<div className="col-3">{this.props.title}</div>
-					<div className="col-9 text-purple">{this.state.val}</div>
+					<div className={titleClass}>{this.props.title}</div>
+					<div className={fieldClass}>{this.state.val}</div>
 				</div>
 			</li>
 		) : (
 			<li className="list-group-item">
 				<div className="row">
-					<div className="col-3">{this.props.title}</div>
+					<div className={titleClass}>{this.props.title}</div>
 					<div className={fieldClass}>
 						<select
 							multiple={false}
-							className="form-control"
+							className="form-control bg-secondary text-white"
 							value={this.state.val}
 							onChange={this.handleChange}
 						>
 							{this.props.fields.map(field => {
-								return <option value={field} key={field}>{field}</option>;
+								return (
+									<option value={field} key={field}>
+										{field}
+									</option>
+								);
 							})}
 						</select>
 					</div>
