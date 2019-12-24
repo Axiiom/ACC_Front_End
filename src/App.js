@@ -8,8 +8,8 @@ class App extends Component {
 		this.updateAlarm = this.updateAlarm.bind(this);
 
 		this.state = {
-			loading: true,
 			alarms: [],
+			loading: true,
 		};
 	}
 
@@ -18,7 +18,6 @@ class App extends Component {
 	}
 
 	async getAlarmById(id) {
-		console.log(this.state);
 		const url = `http://192.168.1.3:3001/api/v1/alarm/${id}`;
 		const response = await fetch(url);
 		const data = await response.json();
@@ -40,14 +39,17 @@ class App extends Component {
 			method: 'POST',
 			body: JSON.stringify(alarm),
 			headers: {
-				'Access-Control-Allow-Origin': '*',
+				'Content-Type': 'application/json',
 			},
+			// headers: {
+			// 	'Access-Control-Allow-Origin': '*',
+			// },
 		};
 
 		const response = await fetch(url, opts);
 		const data = await response.json();
 
-		return response.ok ? data : null;
+		return data;
 	}
 
 	async updateAlarm(alarm) {
@@ -106,9 +108,7 @@ class App extends Component {
 									Click the <i className="text-purple">Create New</i> button above to get started
 								</p>
 							</div>
-						) : (
-							null
-						)}
+						) : null}
 					</>
 				)}
 			</div>

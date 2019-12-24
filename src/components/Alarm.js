@@ -5,17 +5,19 @@ class Alarm extends Component {
 	constructor(props) {
 		super(props);
 
+		console.log(props.alarm);
+
+		const alarm = props.alarm;
 		this.state = {
 			hasChanged: false,
-			staticFields: this.props.static,
-			message: this.props.alarm.message,
-			voiceId: this.props.alarm.voiceId,
-			name: this.props.alarm.name,
-			disabled: this.props.alarm.disabled,
-			cron_string: this.props.alarm.cron_string,
-			city: this.props.alarm.city,
-			country: this.props.alarm.country_code,
-			weatherType: this.props.alarm.weatherType,
+			staticFields: props.staticFields,
+			message: alarm.message,
+			voiceId: alarm.voiceId,
+			title: alarm.title,
+			disabled: alarm.disabled,
+			cronString: alarm.cronString,
+			weatherLocation: alarm.weatherLocation,
+			weatherType: alarm.weatherType,
 		};
 
 		this.voiceIds = [
@@ -42,25 +44,27 @@ class Alarm extends Component {
 
 		if (this.props.alarm.isNew) {
 			var newAlarm = {
-				isNew: false,
 				message: this.state.message,
 				voiceId: this.state.voiceId,
-				name: this.state.name,
 				disabled: this.state.disabled,
-				cron_string: this.state.cron_string,
+				title: this.state.title,
+				cronString: this.state.cronString,
+				weatherLocation: this.state.weatherLocation,
+				weatherType: this.state.weatherType,
+				newsType: 'world',
 			};
 			this.props.alarmOps.create(newAlarm);
+			// this.props.alarm.isNew = false;
+		} else {
+			this.props.alarm.message = this.state.message;
+			this.props.alarm.voiceId = this.state.voiceId;
+			this.props.alarm.disabled = this.state.disabled;
+			this.props.alarm.title = this.state.title;
+			this.props.alarm.cronString = this.state.cronString;
+			this.props.alarm.weatherLocation = this.state.weatherLocation;
+			this.props.alarm.weatherType = this.state.weatherType;
+			this.props.alarmOps.update(this.props.alarm);
 		}
-
-		this.props.alarm.message = this.state.message;
-		this.props.alarm.voiceId = this.state.voiceId;
-		this.props.alarm.disabled = this.state.disabled;
-		this.props.alarm.name = this.state.name;
-		this.props.alarm.cron_string = this.state.cron_string;
-		this.props.alarm.city = this.state.city;
-		this.props.alarm.country_code = this.state.country;
-		this.props.alarm.weather_type = this.state.weatherType;
-		this.props.alarmOps.update(this.props.alarm);
 	};
 
 	setDisabled = () => {
@@ -82,10 +86,10 @@ class Alarm extends Component {
 	updateCronString = time => {
 		var hour = time.split(':')[0];
 		var minute = time.split(':')[1];
-		var days = this.state.cron_string.split(' ')[2];
+		var days = this.state.cronString.split(' ')[3];
 
 		this.setState({
-			cron_string: `${minute} ${hour} ${days} * *`,
+			cronString: `${minute} ${hour} ${days} * *`,
 		});
 	};
 
@@ -96,7 +100,7 @@ class Alarm extends Component {
 			</button>
 		) : !this.state.staticFields ? (
 			<button type="button" className="btn btn-success" onClick={this.updateAlarm}>
-				<i className="fas fa-check"></i>
+				<i className="fas fa-check text-white"></i>
 			</button>
 		) : (
 			<div className="dropdown">
@@ -144,26 +148,30 @@ class Alarm extends Component {
 
 	render() {
 		const isDisabled = this.state.disabled;
-		const name = this.state.name;
+		const title = this.state.title;
 		const textClass = 'h3' + (isDisabled ? ' text-secondary' : '');
 
 		// turn from cron string into readable schedule
-		var [minute, hour, days] = this.state.cron_string.split(' ');
-		var timeOfDay = hour - 12 > 1 ? 'PM' : 'AM';
-		minute = String('00' + minute).slice(-2);
-		hour = ('00' + hour).slice(-2);
-		days = days.split(',');
-		var schedule = [];
-		days.map(day => {
-			schedule.push(`${day}@${hour}:${minute} ${timeOfDay}`);
-		});
+		if (this.state.cronString !== '') {
+			var [minute, hour, n, a, days] = this.state.cronString.split(' ');
+			var timeOfDay = hour - 12 > 1 ? 'PM' : 'AM';
+			minute = String('00' + minute).slice(-2);
+			hour = ('00' + hour).slice(-2);
+			days = days.split(',');
+			var schedule = [];
+			days.map(day => {
+				schedule.push(`${day}@${hour}:${minute} ${timeOfDay}`);
+			});
+		} else {
+			days = [];
+		}
 
 		const headerMain = (
 			<div className="row align-items-center mb-2 justify-content-around">
 				{this.state.staticFields ? (
 					<>
 						<div className="col-8">
-							<p className={textClass}>{name}</p>
+							<p className={textClass}>{title}</p>
 						</div>
 						<div className="col-3">{this.renderEditButton()}</div>
 					</>
@@ -171,9 +179,9 @@ class Alarm extends Component {
 					<>
 						<AlarmFields.AlarmTitleField
 							static={this.state.staticFields}
-							val={this.state.name}
+							val={this.state.title}
 							update={title => {
-								this.setState({name: title});
+								this.setState({title: title});
 							}}
 							disabled={isDisabled}
 						/>
@@ -207,44 +215,41 @@ class Alarm extends Component {
 							}}
 							disabled={isDisabled}
 						/>
-						{this.state.weatherType ? (
-							<>
-								<AlarmFields.AlarmTextField
-									static={this.state.staticFields}
-									val={this.state.weatherType}
-									title="Weather Type"
-									update={weatherType => {
-										this.setState({weatherType: weatherType});
-									}}
-									disabled={isDisabled}
-								/>
-								<AlarmFields.AlarmTextField
-									static={this.state.staticFields}
-									val={this.state.city}
-									title="City"
-									update={city => {
-										this.setState({city: city});
-									}}
-									disabled={isDisabled}
-								/>
-							</>
-						) : null}
+						<AlarmFields.AlarmDropdownField
+							static={this.state.staticFields}
+							val={this.state.weatherType}
+							title="Weather Type"
+							fields={['weekly', 'current']}
+							update={weatherType => {
+								this.setState({weatherType: weatherType});
+							}}
+							disabled={isDisabled}
+						/>
+						<AlarmFields.AlarmTextField
+							static={this.state.staticFields}
+							val={this.state.weatherLocation.split(',')[0]}
+							title="Location"
+							update={weatherLocation => {
+								this.setState({weatherLocation: weatherLocation});
+							}}
+							disabled={isDisabled}
+						/>
 					</ul>
 				</div>
 				<div className="col-md-9 col-lg-4 rounded-lg shadow-lg col-mgn bg-dark">
-					<p className={textClass}>
-						<h3>Schedule</h3>
-					</p>
+					<h3>
+						<p className={textClass}>Schedule</p>
+					</h3>
 					<ul className="list-group list-group-flush list-group-active">
-						{this.state.cron_string
+						{this.state.cronString
 							.split(' ')[2]
 							.split(',')
 							.map(dt => {
-								const time = `${this.state.cron_string.split(' ')[1]}:${
-									this.state.cron_string.split(' ')[0]
+								const time = `${this.state.cronString.split(' ')[1]}:${
+									this.state.cronString.split(' ')[0]
 								}`;
 								return (
-									<li className="list-group-item">
+									<li className="list-group-item" key={time}>
 										<AlarmFields.AlarmScheduleField
 											static={this.state.staticFields}
 											val={time}

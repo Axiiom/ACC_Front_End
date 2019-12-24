@@ -11,7 +11,6 @@ class Alarms extends Component {
 	}
 
 	updateAlarm = alarm => {
-		console.log(alarm)
 		var alarms = this.state.alarms;
 		for (var i = 0; i < alarms; i++) {
 			if (alarms[i]._id === alarm._id) {
@@ -39,21 +38,19 @@ class Alarms extends Component {
 	createAlarm = () => {
 		var newAlarm = {
 			isNew: true,
+			staticFields: false,
+			title: 'New Alarm',
 			message: '',
-			voiceId: '',
-			name: 'New Alarm',
+			cronString: '* * * * *',
+			voiceId: 'Matthew',
+			weatherType: 'weekly',
+			weatherLocation: '',
 			disabled: false,
+			newsType: '',
 		};
 
 		this.setState({
 			alarms: [newAlarm, ...this.state.alarms],
-		});
-	};
-
-	addAlarm = alarm => {
-		const data = this.props.addAlarm(alarm);
-		this.setState({
-			alarms: [data, ...this.state.alarms],
 		});
 	};
 
@@ -69,17 +66,12 @@ class Alarms extends Component {
 					const alarmOps = {
 						update: this.updateAlarm,
 						remove: this.removeAlarm,
-						create: this.addAlarm,
+						create: a => this.props.addAlarm(a),
 					};
 
 					return (
-						<div className="row justify-content-around" key={alarm._id}>
-							<Alarm
-								alarm={alarm}
-								key={alarm._id}
-								alarmOps={alarmOps}
-								static={alarm.isNew ? false : true}
-							/>
+						<div className="row justify-content-around">
+							<Alarm alarm={alarm} alarmOps={alarmOps} staticFields={!alarm.isNew} key={alarm._id} />
 						</div>
 					);
 				})}
