@@ -18,6 +18,7 @@ class Alarm extends Component {
 			cronString: alarm.cronString,
 			weatherLocation: alarm.weatherLocation,
 			weatherType: alarm.weatherType,
+			newsType: alarm.newsType ? alarm.newsType : 'world',
 		};
 
 		this.voiceIds = [
@@ -43,26 +44,13 @@ class Alarm extends Component {
 		this.setState({staticFields: true});
 
 		if (this.props.alarm.isNew) {
-			var newAlarm = {
-				message: this.state.message,
-				voiceId: this.state.voiceId,
-				disabled: this.state.disabled,
-				title: this.state.title,
-				cronString: this.state.cronString,
-				weatherLocation: this.state.weatherLocation,
-				weatherType: this.state.weatherType,
-				newsType: 'world',
-			};
+			var newAlarm = {};
+			for (var key in this.state) newAlarm[key] = this.state[key];
+
 			this.props.alarmOps.create(newAlarm);
-			// this.props.alarm.isNew = false;
 		} else {
-			this.props.alarm.message = this.state.message;
-			this.props.alarm.voiceId = this.state.voiceId;
-			this.props.alarm.disabled = this.state.disabled;
-			this.props.alarm.title = this.state.title;
-			this.props.alarm.cronString = this.state.cronString;
-			this.props.alarm.weatherLocation = this.state.weatherLocation;
-			this.props.alarm.weatherType = this.state.weatherType;
+			for (var key in this.state) this.props.alarm[key] = this.state[key];
+
 			this.props.alarmOps.update(this.props.alarm);
 		}
 	};
@@ -146,6 +134,14 @@ class Alarm extends Component {
 		);
 	}
 
+	addDayToSchedule = (dt) => {
+		console.log(dt)
+	}
+	
+	removeDayFromSchedule = (dt) => {
+		console.log(dt)
+	}
+
 	render() {
 		const isDisabled = this.state.disabled;
 		const title = this.state.title;
@@ -189,6 +185,38 @@ class Alarm extends Component {
 					</>
 				)}
 			</div>
+		);
+
+		const renderSchedule = (
+			<ul className="list-group list-group-flush list-group-active">
+				{this.state.cronString
+					.split(' ')[2]
+					.split(',')
+					.map(dt => {
+						const time = `${this.state.cronString.split(' ')[1]}:${this.state.cronString.split(' ')[0]}`;
+						return (
+							<li className="list-group-item" key={time}>
+								<AlarmFields.AlarmScheduleField
+									static={this.state.staticFields}
+									val={time}
+									title={dt}
+									update={schedule => {
+										this.updateCronString(schedule);
+									}}
+									disabled={isDisabled}
+									removeSelf={() => {this.removeDayFromSchedule(dt)}}
+								/>
+							</li>
+						);
+					})}
+				{this.state.staticFields ? null : (
+					<li className="list-group-item justify-content-end">
+						<div className="row justify-content-end">
+							<button type="button" className="btn btn-success" onClick={this.addDayToSchedule()}>Add Day</button>
+						</div>
+					</li>
+				)}
+			</ul>
 		);
 
 		return (
@@ -240,29 +268,7 @@ class Alarm extends Component {
 					<h3>
 						<p className={textClass}>Schedule</p>
 					</h3>
-					<ul className="list-group list-group-flush list-group-active">
-						{this.state.cronString
-							.split(' ')[2]
-							.split(',')
-							.map(dt => {
-								const time = `${this.state.cronString.split(' ')[1]}:${
-									this.state.cronString.split(' ')[0]
-								}`;
-								return (
-									<li className="list-group-item" key={time}>
-										<AlarmFields.AlarmScheduleField
-											static={this.state.staticFields}
-											val={time}
-											title={dt}
-											update={schedule => {
-												this.updateCronString(schedule);
-											}}
-											disabled={isDisabled}
-										/>
-									</li>
-								);
-							})}
-					</ul>
+					{renderSchedule}
 				</div>
 			</>
 		);

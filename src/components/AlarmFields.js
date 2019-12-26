@@ -162,7 +162,7 @@ class AlarmScheduleField extends Component {
 					></input>
 				</div>
 				<div className="col-2 col-md-1">
-					<button type="button" className="form-control-sm btn-sm btn-danger">
+					<button type="button" className="form-control-sm btn-sm btn-danger" onClick={this.props.removeSelf}>
 						<i className="fas fa-times text-white"></i>
 					</button>
 				</div>
